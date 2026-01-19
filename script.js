@@ -15,6 +15,9 @@ const serviceIgnoreList = ["General Facility", "Elevators"];
 // Remarks that will help to ignore errors when no Operative is assigned to regular events
 const remarksIgnoreList = ["Jeff", "Duplicate", "Modern Niagara"];
 
+// Contractors who are always "Out of Scope"
+const outOfScopeContractors = ["Humber IT", "Support Services", "GE", "Bio-Medical", "Security"];
+
 // Main Function to handle all the errors in the events
 table.querySelectorAll("tr").forEach((row, index) => {
     // If nothing, no need to flow throw
@@ -112,6 +115,39 @@ table.querySelectorAll("tr").forEach((row, index) => {
             mark(serviceCell, "error");
             mark(instructionsCell, "error");
          }
+    }
+
+    // Logic 4: Out of Scope is assigned to right contractors only
+    if (
+        service === "Out of Scope"
+    ) {
+        if (
+            !outOfScopeContractors.includes(contractor)
+        ) {
+            mark(serviceCell, "error")
+        }
+        else if (
+            workType !== "Inspect"
+        ) {
+            mark(workTypeCell, "error");
+        }
+
+        else {
+            mark(serviceCell);
+            mark(contractorCell);
+            mark(workTypeCell);
+        }
+    }
+
+    // Logic 5: Out of Scope Contacts have Out of Scope only
+    if (
+        outOfScopeContractors.includes(contractor)
+    ) {
+        if (
+            service !== "Out of Scope"
+        ) {
+            mark(serviceCell, "error")
+        }
     }
 
     // And at the end, let's see how many totalEvents we have

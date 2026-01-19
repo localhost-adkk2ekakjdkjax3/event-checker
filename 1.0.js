@@ -8,7 +8,8 @@ table.querySelectorAll("tr").forEach((tr, index) => {
 
   const contractorIgnoreList = ["Humber IT", "Support Services", "GE", "Bio-Medical", "Security", "Bal John", "Central Dispatch", "Mike Orrico", "Clintar", "Todd Haynes", "Yondy Lam", "JCI Fire & Security"];
   const serviceIgnoreList = ["Elevators", "General Facility"];
-  const remarksIgnoreList = ["Jeff", "Duplicate", "Modern Niagara"]
+  const remarksIgnoreList = ["Jeff", "Duplicate", "Modern Niagara"];
+
   
   const allTds = tr.querySelectorAll("td");
   
