@@ -35,6 +35,7 @@ const EVENT_GROUPS = {
         "Humidifiers",
         "Macerators",
         "Water System Cold",
+        "Eyewash Stations",
     ],
 
     // USF
@@ -55,6 +56,13 @@ const EVENT_GROUPS = {
         "Transvac - Trash",
         "Transvac - Linen",
         "Neg Pressure RMs Activate/Deactivate",
+        "CCTV",
+        "Neg Pressure RMs Alarm",
+        "Revolv/Overhead door",
+        "Ceiling Patient Lifts",
+        "ADO",
+        "Refrigeration Plant",
+        "Panic Duress",
     ],
 
     // RSF
@@ -75,6 +83,15 @@ const EVENT_GROUPS = {
         "Partitions Internal",
         "Carts",
         "Walls Internal",
+        "Hot Water Tower/Coffee Machines/Conveyor Toaster",
+        "Dynamic Glass",
+        "Blanket Warmers",
+        "Paintwork Internal",
+    ],
+
+    "Emergency SF": [
+        "Code White",
+        "Code OB",
     ],
 
     // Others
@@ -93,6 +110,10 @@ const EVENT_GROUPS = {
         "Door Internal",
         "Outlets",
         "Toilet Other",
+        "Fans",
+        "Ascom",
+        "Water Supply",
+        "Ceilings",
     ]
 };
 
@@ -275,7 +296,7 @@ function mark(field, type = "non-error", increase = false) {
         if (increase) errorCounts++;
     }
     else if (type == "warning") {
-        color = "orange";
+        color = "maroon";
         field.error = true;
         if (increase) warningCounts++;
     }
@@ -283,7 +304,7 @@ function mark(field, type = "non-error", increase = false) {
         color = "blue";
     }
     else if (type == "shady") {
-        color = "purple";
+        color = "orange";
         if (increase) shadyCounts++;
     }
 
