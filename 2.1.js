@@ -172,6 +172,11 @@ table.querySelectorAll("tr").forEach((row, index) => {
         reportedBy: createField(cells[9])
     };
 
+    // Logic 0: Check if I made IT
+    if (fields.instructions.data.includes("Abhinav Singh")) {
+        mark(fields.instructions, "abhinav");
+    }
+
     // Logic 1: Checking if required cells are empty (Remarks)
     if (
         fields.remarks.data === "" ||
@@ -306,6 +311,9 @@ function mark(field, type = "non-error", increase = false) {
     else if (type == "shady") {
         color = "orange";
         if (increase) shadyCounts++;
+    }
+    else if (type == "abhinav") {
+        color = "magenta"
     }
 
     field.cell.style.backgroundColor = color;
