@@ -175,6 +175,10 @@ table.querySelectorAll("tr").forEach((row, index) => {
     // Logic 0: Check if I made IT
     if (fields.instructions.data.includes("Abhinav Singh")) {
         mark(fields.status, "abhinav");
+
+        if (!(fields.remarks.data.includes("Abhinav Singh")) {
+            mark(fields.remarks, "error", true);
+        })
     }
 
     // Logic 1: Checking if required cells are empty (Remarks)
