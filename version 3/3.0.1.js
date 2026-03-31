@@ -1,3 +1,4 @@
+// Version 3.0.1
 // Global Parent
 const table = document.getElementById("ctl00_CPH_rgED_GridData");
 
@@ -23,78 +24,40 @@ const outOfScopeContractors = [
 
 
 // =============================
-// Dictionary/Object to map the regular and most common services
-// (cleaned, no repetition, same behaviour)
+// Event Groups
 // =============================
 const EVENT_GROUPS = {
-    // UAF
     "Urgent AF": [
-        "Toilet Blocked",
-        "Elevators",
-        "Sink",
-        "Humidifiers",
-        "Macerators",
-        "Water System Cold",
-        "Eyewash Stations",
+        "Toilet Blocked", "Elevators", "Sink", "Humidifiers",
+        "Macerators", "Water System Cold", "Eyewash Stations",
     ],
 
-    // USF
     "Urgent SF": [
-        "Nurse Call",
-        "Fridge/Freezer",
-        "Sterilizers",
-        "Pneumatic Tube",
-        "Patient Wandering",
-        "Code Brown, Hazmat",
-        "Odour",
-        "Electrical Equipment", 
-        "Vents/Hatches",
-        "Gas Medical",
-        "Snow/Ice Clearance",
-        "AGV",
-        "Tap Faulty",
-        "Transvac - Trash",
-        "Transvac - Linen",
-        "Neg Pressure RMs Activate/Deactivate",
-        "CCTV",
-        "Neg Pressure RMs Alarm",
-        "Revolv/Overhead door",
-        "Ceiling Patient Lifts",
-        "ADO",
-        "Refrigeration Plant",
+        "Nurse Call", "Fridge/Freezer", "Sterilizers", "Pneumatic Tube",
+        "Patient Wandering", "Code Brown, Hazmat", "Odour",
+        "Electrical Equipment", "Vents/Hatches", "Gas Medical",
+        "Snow/Ice Clearance", "AGV", "Tap Faulty",
+        "Transvac - Trash", "Transvac - Linen",
+        "Neg Pressure RMs Activate/Deactivate", "CCTV",
+        "Neg Pressure RMs Alarm", "Revolv/Overhead door",
+        "Ceiling Patient Lifts", "ADO", "Refrigeration Plant",
         "Panic Duress",
     ],
 
-    // RSF
     "Routine SF": [
         "Office Furniture (Desks, Chairs, Tables, Cabinet)",
-        "Room Too Hot",
-        "Room Too Cold",
-        "Bed Management",
+        "Room Too Hot", "Room Too Cold", "Bed Management",
         "Medical Chairs (Geri, Bariatric, Commodes)",
-        "Int. Repair Other",
-        "Wheelchairs/Walkers",
-        "Patient Room/Lounge Furniture",
-        "IT/Telecoms",
-        "Ice Machines",
-        "Curtains/Rails",
-        "Network",
-        "Floors",
-        "Partitions Internal",
-        "Carts",
-        "Walls Internal",
-        "Hot Water Tower/Coffee Machines/Conveyor Toaster",
-        "Dynamic Glass",
-        "Blanket Warmers",
-        "Paintwork Internal",
+        "Int. Repair Other", "Wheelchairs/Walkers",
+        "Patient Room/Lounge Furniture", "IT/Telecoms",
+        "Ice Machines", "Curtains/Rails", "Network",
+        "Floors", "Partitions Internal", "Carts",
+        "Walls Internal", "Hot Water Tower/Coffee Machines/Conveyor Toaster",
+        "Dynamic Glass", "Blanket Warmers", "Paintwork Internal",
     ],
 
-    "Emergency SF": [
-        "Code White",
-        "Code OB",
-    ],
+    "Emergency SF": ["Code White", "Code OB"],
 
-    // Others
     "Other": {
         "Out of Scope": "Inspect",
         "Keys": "General Facility Service",
@@ -103,27 +66,16 @@ const EVENT_GROUPS = {
         "General Facility": "General Facility Service",
     },
 
-    // Shady
     "Shady": [
-        "Lighting Internal",
-        "Sink",
-        "Door Internal",
-        "Outlets",
-        "Toilet Other",
-        "Fans",
-        "Ascom",
-        "Water Supply",
-        "Ceilings",
+        "Lighting Internal", "Sink", "Door Internal",
+        "Outlets", "Toilet Other", "Fans",
+        "Ascom", "Water Supply", "Ceilings",
     ]
 };
 
 
-// =============================
-// Build eventMapper automatically
-// =============================
+// Build Mapper
 const eventMapper = {};
-
-// Normal mappings
 Object.entries(EVENT_GROUPS).forEach(([group, services]) => {
     if (Array.isArray(services)) {
         services.forEach(service => {
@@ -131,17 +83,14 @@ Object.entries(EVENT_GROUPS).forEach(([group, services]) => {
         });
     }
 });
-
-// Explicit mappings
 Object.entries(EVENT_GROUPS.Other).forEach(([service, workType]) => {
     eventMapper[service] = workType;
 });
 
-// Track shady services separately
 const shadyServices = new Set(EVENT_GROUPS.Shady);
 
 
-// Factory method to create the fields for row table
+// Field factory
 const createField = (cell) => ({
     cell,
     data: cell?.textContent.trim() || "",
@@ -149,16 +98,13 @@ const createField = (cell) => ({
 });
 
 
-// Main Function to handle all the errors in the events
+// Main Loop
 table.querySelectorAll("tr").forEach((row, index) => {
 
-    // If nothing, no need to flow throw
-    if (index == 0) return;
+    if (index === 0) return;
 
-    // If something, fetch all the data
     const cells = row.querySelectorAll("td");
 
-    // Cell methods
     const fields = {
         event: createField(cells[0]),
         status: createField(cells[1]),
@@ -172,7 +118,29 @@ table.querySelectorAll("tr").forEach((row, index) => {
         reportedBy: createField(cells[9])
     };
 
-    // Logic 0: Check if I made IT
+    // ✅ ONLY process Abhinav rows
+    const isAbhinav =
+        fields.instructions.data.includes("Abhinav Singh") ||
+        fields.remarks.data.includes("Abhinav Singh");
+
+    if (!isAbhinav) return;
+
+    // =============================
+    // 🔴 NEW LOGIC: Status = Reported → Whole row RED
+    // =============================
+    if (fields.status.data === "Reported") {
+        row.querySelectorAll("td").forEach(cell => {
+            cell.style.backgroundColor = "red";
+            cell.style.color = "white";
+        });
+        errorCounts++;
+        totalEvents++;
+        return; // skip further checks
+    }
+
+    // =============================
+    // Abhinav marking
+    // =============================
     if (fields.instructions.data.includes("Abhinav Singh")) {
         mark(fields.status, "abhinav");
 
@@ -181,19 +149,21 @@ table.querySelectorAll("tr").forEach((row, index) => {
         }
     }
 
-    // Logic 1: Checking if required cells are empty (Remarks)
+    // ✅ NEW: Remarks also count as Abhinav (only if no error)
     if (
-        fields.remarks.data === "" ||
-        fields.remarks.data === "\u00A0"
+        fields.remarks.data.includes("Abhinav Singh") &&
+        !fields.remarks.error
     ) {
+        mark(fields.status, "abhinav");
+    }
+
+    // Logic 1: Remarks empty
+    if (fields.remarks.data === "" || fields.remarks.data === "\u00A0") {
         mark(fields.remarks, "error", true);
     }
 
-    // Logic 2: Checking the missing operative with the condition (was even required or not)
-    if (
-        fields.operative.data === "" ||
-        fields.operative.data === "\u00A0"
-    ) {
+    // Logic 2: Missing operative
+    if (fields.operative.data === "" || fields.operative.data === "\u00A0") {
         if (
             !ignoreOperativeFor.includes(fields.contractor.data) &&
             !serviceIgnoreList.includes(fields.service.data) &&
@@ -203,22 +173,17 @@ table.querySelectorAll("tr").forEach((row, index) => {
         }
     }
 
-    // Logic 3: Temperature events
-    // 1. Template is Right
-    // 2. Instructions Matches with Service
+    // Logic 3: Temperature
     if (
         fields.service.data == "Room Too Cold" ||
         fields.service.data == "Room Too Hot"
     ) {
         if (fields.remarks.data.includes("RDS")) {
             mark(fields.remarks);
-        }
-        else {
+        } else {
             mark(fields.remarks, "error", true);
         }
 
-        // Instructions mathces with service
-        // Service matches to Instructions
         if (
             (fields.service.data == "Room Too Cold" &&
                 fields.instructions.data.includes("cold")) ||
@@ -227,73 +192,61 @@ table.querySelectorAll("tr").forEach((row, index) => {
         ) {
             mark(fields.service);
             mark(fields.instructions);
-        }
-        else {
+        } else {
             mark(fields.service, "error", true);
             mark(fields.instructions, "error");
         }
     }
 
-    // Logic 4: Out of Scope is assigned to right contractors only
+    // Logic 4: Out of Scope valid contractor
     if (fields.service.data === "Out of Scope") {
         if (!outOfScopeContractors.includes(fields.contractor.data)) {
             mark(fields.service, "error", true);
-        }
-        else {
+        } else {
             mark(fields.service);
             mark(fields.contractor);
             mark(fields.workType);
         }
     }
 
-    // Logic 5: Out of Scope Contractors have Out of Scope only
+    // Logic 5: Contractor restriction
     if (outOfScopeContractors.includes(fields.contractor.data)) {
         if (fields.service.data !== "Out of Scope") {
             mark(fields.service, "error", true);
         }
     }
 
-    // Logic 6: Mike Orrico is closed
+    // Logic 6
     if (fields.contractor.data === "Milke Orrico") {
         if (fields.status.data === "Rectification") {
             mark(fields.status);
         }
     }
 
-    // Logic Alpha: Are services assigned to right work type
+    // Logic Alpha
     if (fields.service.data in eventMapper) {
-
         if (shadyServices.has(fields.service.data)) {
             mark(fields.service, "shady", true);
             mark(fields.workType, "shady");
         }
-
         else if (eventMapper[fields.service.data] !== fields.workType.data) {
             mark(fields.service, "warning", true);
             mark(fields.workType, "warning");
         }
-
         else {
             mark(fields.service);
             mark(fields.workType);
         }
-    }
-
-    if (!(fields.service.data in eventMapper)) {
+    } else {
         mark(fields.service, "unknown");
         mark(fields.workType, "unknown");
     }
 
-    // Logic Beta: Are services assigned to right contractor
-    // TODO
-
-    // And at the end, let's see how many totalEvents we have
     totalEvents++;
 });
 
 
-// Functions
-// Marker for errors or correct values
+// Marker
 function mark(field, type = "non-error", increase = false) {
     if ((type === "non-error") && field.error) return;
 
@@ -317,7 +270,7 @@ function mark(field, type = "non-error", increase = false) {
         if (increase) shadyCounts++;
     }
     else if (type == "abhinav") {
-        color = "magenta"
+        color = "magenta";
     }
 
     field.cell.style.backgroundColor = color;
@@ -325,9 +278,9 @@ function mark(field, type = "non-error", increase = false) {
 }
 
 
-// Showing the important information at the end
+// Final Stats
 alert(`Hey Man, below are the stats
-       > Total Events are: ${totalEvents}
-       > Total Errors are: ${errorCounts}
-       > Total Shadies are: ${shadyCounts}
-       > Total Warnings are: ${warningCounts}`);
+> Total Events are: ${totalEvents}
+> Total Errors are: ${errorCounts}
+> Total Shadies are: ${shadyCounts}
+> Total Warnings are: ${warningCounts}`);
